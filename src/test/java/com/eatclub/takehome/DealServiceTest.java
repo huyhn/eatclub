@@ -18,9 +18,16 @@ public class DealServiceTest {
     DealService dealService;
 
     @Test
-    public void dataLoaderTest() throws IOException, ParseException {
+    public void getActiveDealsTest() throws IOException, ParseException {
         List<RestaurantDeal> results = dealService.getActiveDeals("10:30");
-        System.out.println(results);
         assertEquals(2, results.size());
+    }
+
+
+    @Test
+    public void getPeakTest() throws IOException, ParseException {
+        PeakPeriod peak = dealService.getPeak();
+        assertEquals("04:00pm", peak.peakTimeStart());
+        assertEquals("09:00pm", peak.peakTimeEnd());
     }
 }

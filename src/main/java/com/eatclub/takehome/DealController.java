@@ -22,8 +22,8 @@ public class DealController {
         return dealService.getActiveDeals(timeOfDay.get());
     }
 
-    @GetMapping("/peak")
+    @GetMapping("/deals/peak")
     PeakPeriod peak() {
-        return new PeakPeriod("..", "..");
+        return dealService.getPeak();
     }
 }

@@ -3,7 +3,6 @@ package com.eatclub.takehome;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.*;
 
 @Service
@@ -35,6 +34,49 @@ public class DealService {
 
     public List<RestaurantDeal> getActiveDeals(String timeOfDay) {
         Map<String, RestaurantDeal> deals = this.getAllDeals();
+        List<TimePeriod> periods = getTimePeriods(deals);
+
+        int currentTime = TimeUtil.convertTime(timeOfDay);
+        List<RestaurantDeal> restaurantDeals = new ArrayList<>();
+        for (TimePeriod period : periods) {
+            if (currentTime >= period.start && currentTime <= period.end) {
+                restaurantDeals.add(deals.get(period.id));
+            }
+        }
+        return restaurantDeals;
+    }
+
+    public PeakPeriod getPeak() {
+        Map<String, RestaurantDeal> deals = this.getAllDeals();
+        List<Timestamp> timestamps = new ArrayList<>();
+        for (RestaurantDeal deal : deals.values()) {
+            timestamps.add(new Timestamp(TimeUtil.convertTime(deal.restaurantOpen()), 1));
+            timestamps.add(new Timestamp(TimeUtil.convertTime(deal.restaurantClose()), 0));
+        }
+        timestamps.sort(Comparator.comparing(Timestamp::timestamp).thenComparing(Timestamp::isStart));
+
+        int maxCount = 0;
+        int count = 0;
+        int start = 0;
+        int end = 0;
+        for (Timestamp t : timestamps) {
+            if (t.isStart == 1) {
+                count++;
+                if (count > maxCount) {
+                    start = t.timestamp;
+                    maxCount = count;
+                }
+            } else {
+                if (count == maxCount) {
+                    end = t.timestamp;
+                }
+                count--;
+            }
+        }
+        return new PeakPeriod(TimeUtil.convertTime(start), TimeUtil.convertTime(end));
+    }
+
+    private List<TimePeriod> getTimePeriods( Map<String, RestaurantDeal> deals) {
         List<TimePeriod> periods = new ArrayList<>();
         for (RestaurantDeal deal : deals.values()) {
             int start = TimeUtil.convertTime(deal.restaurantOpen());
@@ -47,18 +89,10 @@ public class DealService {
             }
         }
         periods.sort(Comparator.comparingInt(o -> o.start));
-
-        int currentTime = TimeUtil.convertTime(timeOfDay);
-        List<RestaurantDeal> restaurantDeals = new ArrayList<>();
-        for (TimePeriod period : periods) {
-            if (currentTime >= period.start && currentTime <= period.end) {
-                restaurantDeals.add(deals.get(period.id));
-            }
-        }
-        return restaurantDeals;
+        return periods;
     }
 
     private record TimePeriod (String id, int start, int end) {}
-
+    private record Timestamp (int timestamp, int isStart) {}
 
 }

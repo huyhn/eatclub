@@ -27,4 +27,15 @@ public final class TimeUtil {
 
         return (hour + appendHour) * 60 + minutes;
     }
+
+    public static String convertTime(int t) {
+        int hour = t / 60;
+        int minute = t % 60;
+        if (hour >= 13) {
+            return String.format("%02d:%02d", hour - 12, minute) + "pm";
+        } else if (hour <= 11) {
+            return String.format("%02d:%02d", hour, minute) + "am";
+        }
+        return String.format("%02d:%02d", hour, minute) + "pm";
+    }
 }

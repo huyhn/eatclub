@@ -12,7 +12,7 @@ public class DealService {
 
     protected Map<String, RestaurantDeal> getAllDeals() {
         Map<String, RestaurantDeal> deals = new HashMap<>();
-        for (Restaurant restaurant : restaurantRepository.all()) {
+        for (Restaurant restaurant : restaurantRepository.all().values()) {
             for (Deal deal : restaurant.deals()) {
                 deals.put(deal.objectId(), new RestaurantDeal(
                         restaurant.objectId(),
@@ -40,7 +40,22 @@ public class DealService {
         List<RestaurantDeal> restaurantDeals = new ArrayList<>();
         for (TimePeriod period : periods) {
             if (currentTime >= period.start && currentTime <= period.end) {
-                restaurantDeals.add(deals.get(period.id));
+                RestaurantDeal deal = deals.get(period.id);
+                Restaurant restaurant = restaurantRepository.all().get(deal.restaurantObjectId());
+                deal = new RestaurantDeal(
+                        deal.restaurantObjectId(),
+                        deal.restaurantName(),
+                        deal.restaurantAddress1(),
+                        deal.restaurantSuburb(),
+                        restaurant.open(),    // update with restaurant open time and not deal open time
+                        restaurant.close(),   // update with restaurant close time and not deal close time
+                        deal.dealObjectId(),
+                        deal.discount(),
+                        deal.dineIn(),
+                        deal.lightning(),
+                        deal.qtyLeft()
+                );
+                restaurantDeals.add(deal);
             }
         }
         return restaurantDeals;

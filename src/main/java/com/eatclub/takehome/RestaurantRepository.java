@@ -3,17 +3,19 @@ package com.eatclub.takehome;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class RestaurantRepository {
-    private final List<Restaurant> restaurants = new ArrayList<>();
+    private final Map<String, Restaurant> restaurants = new HashMap<>();
 
 
     public void add(Restaurant restaurant) {
-        restaurants.add(restaurant);
+        restaurants.put(restaurant.objectId(), restaurant);
     }
-    public List<Restaurant> all() {
+    public Map<String, Restaurant> all() {
         return restaurants;
     }
 }

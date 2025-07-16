@@ -17,7 +17,7 @@ public final class TimeUtil {
             timeOfDay = timeOfDay.replace("pm", "");
         } else {
             if (timeOfDay.startsWith("12:")) {
-                // fix for 12:00am
+                // fix for 12:00
                 timeOfDay = timeOfDay.replace("12:", "00:");
             }
         }

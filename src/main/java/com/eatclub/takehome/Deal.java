@@ -1,12 +1,13 @@
 package com.eatclub.takehome;
 
 public record Deal(
+        String restaurantId,
         String objectId,
         String discount,
-        boolean dineIn,
-        boolean lightning,
+        String dineIn,
+        String lightning,
         String open,
         String close,
-        int quantityLeft
+        String quantityLeft
 ){
 }

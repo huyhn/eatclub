@@ -1,0 +1,64 @@
+package com.eatclub.takehome;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.util.*;
+
+@Service
+public class DealService {
+
+    @Autowired RestaurantRepository restaurantRepository;
+
+    protected Map<String, RestaurantDeal> getAllDeals() {
+        Map<String, RestaurantDeal> deals = new HashMap<>();
+        for (Restaurant restaurant : restaurantRepository.all()) {
+            for (Deal deal : restaurant.deals()) {
+                deals.put(deal.objectId(), new RestaurantDeal(
+                        restaurant.objectId(),
+                        restaurant.name(),
+                        restaurant.address1(),
+                        restaurant.suburb(),
+                        deal.open().isBlank() ? restaurant.open() : deal.open(),
+                        deal.close().isBlank() ? restaurant.close() : deal.close(),
+                        deal.objectId(),
+                        deal.discount(),
+                        deal.dineIn(),
+                        deal.lightning(),
+                        deal.quantityLeft()
+                ));
+            }
+        }
+        return deals;
+    }
+
+    public List<RestaurantDeal> getActiveDeals(String timeOfDay) {
+        Map<String, RestaurantDeal> deals = this.getAllDeals();
+        List<TimePeriod> periods = new ArrayList<>();
+        for (RestaurantDeal deal : deals.values()) {
+            int start = TimeUtil.convertTime(deal.restaurantOpen());
+            int end = TimeUtil.convertTime(deal.restaurantClose());
+            if (start <= end) {
+                periods.add(new TimePeriod(deal.dealObjectId(), start, end));
+            } else {
+                periods.add(new TimePeriod(deal.dealObjectId(), start, TimeUtil.convertTime("11:59pm")));
+                periods.add(new TimePeriod(deal.dealObjectId(), 0, end));
+            }
+        }
+        periods.sort(Comparator.comparingInt(o -> o.start));
+
+        int currentTime = TimeUtil.convertTime(timeOfDay);
+        List<RestaurantDeal> restaurantDeals = new ArrayList<>();
+        for (TimePeriod period : periods) {
+            if (currentTime >= period.start && currentTime <= period.end) {
+                restaurantDeals.add(deals.get(period.id));
+            }
+        }
+        return restaurantDeals;
+    }
+
+    private record TimePeriod (String id, int start, int end) {}
+
+
+}

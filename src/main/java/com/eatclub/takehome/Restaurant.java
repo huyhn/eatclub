@@ -11,5 +11,5 @@ public record Restaurant(
         String open,
         String close,
         List<String> cuisines,
-        List<Deal> deal
+        List<Deal> deals
         ) {}

@@ -65,17 +65,17 @@ public class DealService {
         Map<String, RestaurantDeal> deals = this.getAllDeals();
         List<Timestamp> timestamps = new ArrayList<>();
         for (RestaurantDeal deal : deals.values()) {
-            timestamps.add(new Timestamp(TimeUtil.convertTime(deal.restaurantOpen()), 1));
-            timestamps.add(new Timestamp(TimeUtil.convertTime(deal.restaurantClose()), 0));
+            timestamps.add(new Timestamp(TimeUtil.convertTime(deal.restaurantOpen()), 0));
+            timestamps.add(new Timestamp(TimeUtil.convertTime(deal.restaurantClose()), 1));
         }
-        timestamps.sort(Comparator.comparing(Timestamp::timestamp).thenComparing(Timestamp::isStart));
+        timestamps.sort(Comparator.comparing(Timestamp::timestamp).thenComparing(Timestamp::isEnd));
 
         int maxCount = 0;
         int count = 0;
         int start = 0;
         int end = 0;
         for (Timestamp t : timestamps) {
-            if (t.isStart == 1) {
+            if (t.isEnd == 0) {
                 count++;
                 if (count > maxCount) {
                     start = t.timestamp;
@@ -108,6 +108,6 @@ public class DealService {
     }
 
     private record TimePeriod (String id, int start, int end) {}
-    private record Timestamp (int timestamp, int isStart) {}
+    private record Timestamp (int timestamp, int isEnd) {}
 
 }
